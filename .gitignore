@@ -1,0 +1,25 @@
+# Ignore model outputs, checkpoints, and large binaries
+model_output/
+checkpoint-*/
+**/checkpoint-*/
+*.safetensors
+*.pt
+*.pth
+*.pth.tar
+*.bin
+*.ckpt
+*.h5
+*.onnx
+*.tar.gz
+*.zip
+hs_err_pid*.log
+
+# Ignore Mecab install directories and large tooling files
+/**/Mecab-ko-for-Google-Colab/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# OS files
+Thumbs.db
+desktop.ini
