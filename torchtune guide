@@ -1,0 +1,98 @@
+# Install stable PyTorch, torchvision, torchao stable releases
+pip install torch torchvision torchao
+pip install torchtune
+
+# Install PyTorch, torchvision, torchao nightlies.
+pip install --pre --upgrade torch torchvision torchao --index-url https://download.pytorch.org/whl/nightly/cu126 # full options are cpu/cu118/cu124/cu126/xpu/rocm6.2/rocm6.3/rocm6.4
+pip install --pre --upgrade torchtune --extra-index-url https://download.pytorch.org/whl/nightly/cpu
+
+To confirm that the package is installed correctly, you can run the following command:
+tune --help
+
+And should see the following output:
+usage: tune [-h] {ls,cp,download,run,validate} ...
+Welcome to the torchtune CLI!
+options:
+-h, --help            show this help message and exit
+
+# Downloading a model
+# To download Llama3.1, you can run:
+
+tune download meta-llama/Meta-Llama-3.1-8B-Instruct \
+--output-dir /tmp/Meta-Llama-3.1-8B-Instruct \
+--ignore-patterns "original/consolidated.00.pth" \
+--hf-token <HF_TOKEN> \
+
+You can finetune Llama3.1 8B with LoRA on a single GPU using the following command:
+tune run lora_finetune_single_device --config llama3_1/8B_lora_single_device
+
+For distributed training, tune CLI integrates with torchrun. To run a full finetune of Llama3.1 8B on two GPUs:
+tune run --nproc_per_node 2 full_finetune_distributed --config llama3_1/8B_full
+
+Modify Configs
+There are two ways in which you can modify configs:
+
+Config Overrides
+You can directly overwrite config fields from the command line:
+tune run lora_finetune_single_device \
+--config llama2/7B_lora_single_device \
+batch_size=8 \
+enable_activation_checkpointing=True \
+max_steps_per_epoch=128
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Update a Local Copy
+
+You can also copy the config to your local directory and modify the contents directly:
+tune cp llama3_1/8B_full ./my_custom_config.yaml
+Copied to ./my_custom_config.yaml
+
+
+Then, you can run your custom recipe by directing the tune run command to your local files:
+tune run full_finetune_distributed --config ./my_custom_config.yaml
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Custom Devices
+torchtune supports finetuning on a variety of devices, including NVIDIA GPU, Intel XPU, AMD ROCm, Apple MPS, and Ascend NPU. If you're interested in running recipes on a custom device, such as Intel XPU, follow the steps below.
+
+Step 1: Refer to the Getting Started on Intel GPU guide to configure your environment.
+
+Step 2: Update device information via either CLI override or config changes. You can directly overwrite config fields from the command line:
+tune run lora_finetune_single_device --config llama3_1/8B_lora_single_device device=xpu
+Or edit your local copy of configuration files and replace device: cuda with device: xpu
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Community 🌍
+torchtune focuses on integrating with popular tools and libraries from the ecosystem. These are just a few examples, with more under development:
+
+Hugging Face Hub for accessing model weights
+EleutherAI's LM Eval Harness for evaluating trained models
+Hugging Face Datasets for access to training and evaluation datasets
+PyTorch FSDP2 for distributed training
+torchao for lower precision dtypes and post-training quantization techniques
+Weights & Biases for logging metrics and checkpoints, and tracking training progress
+Comet as another option for logging
+ExecuTorch for on-device inference using finetuned models
+bitsandbytes for low memory optimizers for our single-device recipes
+PEFT for continued finetuning or inference with torchtune models in the Hugging Face ecosystem
+ 
+
+Community Contributions
+We really value our community and the contributions made by our wonderful users. We'll use this section to call out some of these contributions. If you'd like to help out as well, please see the CONTRIBUTING guide.
+
+@SalmanMohammadi for adding a comprehensive end-to-end recipe for Reinforcement Learning from Human Feedback (RLHF) finetuning with PPO to torchtune
+@fyabc for adding Qwen2 models, tokenizer, and recipe integration to torchtune
+@solitude-alive for adding the Gemma 2B model to torchtune, including recipe changes, numeric validations of the models and recipe correctness
+@yechenzhi for adding Direct Preference Optimization (DPO) to torchtune, including the recipe and config along with correctness checks
+@Optimox for adding all the Gemma2 variants to torchtune!
+ 
+
+Acknowledgements 🙏
+The transformer code in this repository is inspired by the original Llama2 code. We also want to give a huge shout-out to EleutherAI, Hugging Face and Weights & Biases for being wonderful collaborators and for working with us on some of these integrations within torchtune. In addition, we want to acknowledge some other awesome libraries and tools from the ecosystem:
+
+gpt-fast for performant LLM inference techniques which we've adopted out-of-the-box
+llama recipes for spring-boarding the llama2 community
+bitsandbytes for bringing several memory and performance based techniques to the PyTorch ecosystem
+@winglian and axolotl for early feedback and brainstorming on torchtune's design and feature set.
+lit-gpt for pushing the LLM finetuning community forward.
+HF TRL for making reward modeling more accessible to the PyTorch community.
